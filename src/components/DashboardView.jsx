@@ -8,7 +8,7 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import { CORE_PILLARS, TESTIMONIALS } from '../data/hubData';
+import { CORE_PILLARS } from '../data/hubData';
 
 function MiniPreview({ type }) {
   if (type === 'study') {
@@ -115,6 +115,36 @@ function MiniPreview({ type }) {
 }
 
 export default function DashboardView({ onNavigate, stats }) {
+  const highlights = [
+    {
+      label: 'Main Feature',
+      value: 'Study AI',
+      desc: 'PDF, DOCX, MCQs, English/Urdu & Flashcards.',
+      Icon: BookOpen,
+    },
+    {
+      label: 'Smart Math',
+      value: 'Solver',
+      desc: 'Scientific calculator & equation derivations.',
+      Icon: Calculator,
+    },
+    {
+      label: 'Your Progress',
+      value:
+        stats.quizzesTaken > 0
+          ? `${stats.avgScore}%`
+          : `${stats.tasksDone}/${stats.totalTasks}`,
+      desc: `${stats.quizzesTaken} quizzes logged · ${stats.tasksDone} of ${stats.totalTasks} tasks done.`,
+      Icon: Trophy,
+    },
+    {
+      label: 'Arena & Orgs',
+      value: '4+ Squads',
+      desc: 'Blitz Scrims, Nice, Leader & 56 Esports.',
+      Icon: Gamepad2,
+    },
+  ];
+
   return (
     <>
       {/* Hero Banner matching reference layout */}
@@ -160,56 +190,21 @@ export default function DashboardView({ onNavigate, stats }) {
         </div>
       </section>
 
-      {/* Bento Overview Stats Grid matching reference */}
+      {/* Compact highlight stats row */}
       <section aria-label="Platform highlights">
         <div className="bento-grid">
-          <article className="bento-card">
-            <div>
-              <span className="bento-label">01 · Main Feature</span>
-              <p className="bento-value">Study AI</p>
-              <p className="bento-desc">PDF, DOCX, MCQs, English/Urdu &amp; Flashcards.</p>
-            </div>
-            <div className="bento-icon-box" aria-hidden="true">
-              <BookOpen size={20} />
-            </div>
-          </article>
-
-          <article className="bento-card">
-            <div>
-              <span className="bento-label">02 · Smart Math</span>
-              <p className="bento-value">Solver</p>
-              <p className="bento-desc">Scientific calculator &amp; equation derivations.</p>
-            </div>
-            <div className="bento-icon-box" aria-hidden="true">
-              <Calculator size={20} />
-            </div>
-          </article>
-
-          <article className="bento-card">
-            <div>
-              <span className="bento-label">Your Progress</span>
-              <p className="bento-value">
-                {stats.quizzesTaken > 0 ? `${stats.avgScore}%` : `${stats.tasksDone}/${stats.totalTasks}`}
-              </p>
-              <p className="bento-desc">
-                {stats.quizzesTaken} quizzes logged · {stats.tasksDone} of {stats.totalTasks} tasks done.
-              </p>
-            </div>
-            <div className="bento-icon-box" aria-hidden="true">
-              <Trophy size={20} />
-            </div>
-          </article>
-
-          <article className="bento-card">
-            <div>
-              <span className="bento-label">04–06 · Arena &amp; Orgs</span>
-              <p className="bento-value">4+ Squads</p>
-              <p className="bento-desc">Blitz Scrims, Nice, Leader &amp; 56 Esports.</p>
-            </div>
-            <div className="bento-icon-box" aria-hidden="true">
-              <Gamepad2 size={20} />
-            </div>
-          </article>
+          {highlights.map(({ label, value, desc, Icon }) => (
+            <article key={label} className="bento-card">
+              <div className="bento-top">
+                <span className="bento-label">{label}</span>
+                <span className="bento-icon-box" aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+              </div>
+              <p className="bento-value">{value}</p>
+              <p className="bento-desc">{desc}</p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -244,44 +239,6 @@ export default function DashboardView({ onNavigate, stats }) {
                 <p className="offer-desc">{item.description}</p>
               </article>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials section matching reference */}
-      <section aria-labelledby="testimonials-heading">
-        <div className="testimonials-layout">
-          <div className="testimonial-intro">
-            <h2 id="testimonials-heading" className="section-title">
-              What our students says.....
-            </h2>
-            <p className="offer-desc">
-              Built for university students, exam-prep learners, and competitive PUBG Mobile squads.
-            </p>
-          </div>
-
-          {TESTIMONIALS.map((t) => (
-            <article key={t.name} className="testimonial-card">
-              <div className="stars-badge" aria-label="5 out of 5 stars">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <span key={n} className="star-box" aria-hidden="true">
-                    ★
-                  </span>
-                ))}
-              </div>
-              <p className="offer-desc">{t.quote}</p>
-              <div className="testimonial-author">
-                <span className="avatar-dot" aria-hidden="true">
-                  {t.initials}
-                </span>
-                <div>
-                  <strong>{t.name}</strong>
-                  <div className="muted" style={{ fontSize: '0.75rem' }}>
-                    {t.role}
-                  </div>
-                </div>
-              </div>
-            </article>
           ))}
         </div>
       </section>
@@ -332,8 +289,8 @@ export default function DashboardView({ onNavigate, stats }) {
         </div>
 
         {/* Clean SVG illustration matching reference bottom banner aesthetic */}
-        <div style={{ display: 'grid', placeItems: 'center' }} aria-hidden="true">
-          <svg viewBox="0 0 300 180" width="280" height="168" fill="none">
+        <div className="cta-art" aria-hidden="true">
+          <svg viewBox="0 0 300 180" width="300" height="180" fill="none">
             <rect x="24" y="24" width="252" height="132" rx="20" fill="#EFF4FF" />
             <circle cx="98" cy="72" r="22" fill="#1D63ED" opacity="0.16" />
             <circle cx="202" cy="72" r="22" fill="#1D63ED" opacity="0.16" />

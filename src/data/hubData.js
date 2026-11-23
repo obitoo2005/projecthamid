@@ -99,65 +99,6 @@ Cellular respiration converts glucose and oxygen into ATP energy inside mitochon
   },
 ];
 
-export const TESTIMONIALS = [
-  {
-    name: 'Hamza Tariq',
-    role: 'BSCS Student · Lahore',
-    initials: 'HT',
-    quote:
-      'Uploading my lecture PDF and getting instant Urdu explanations plus MCQs cut my exam prep time in half.',
-  },
-  {
-    name: 'Areeba Khan',
-    role: 'Pre-Med · Karachi',
-    initials: 'AK',
-    quote:
-      'The practice tests and flip flashcards helped me jump from 68% to 92% in Biology quizzes within two weeks.',
-  },
-  {
-    name: 'Zain "Nova" Malik',
-    role: 'IGL · Blitz Alpha',
-    initials: 'ZM',
-    quote:
-      'Having my study planner and Blitz Official Scrims schedule on one dashboard keeps my academics and squad balanced.',
-  },
-  {
-    name: 'Bilal Ahmed',
-    role: 'Engineering · Islamabad',
-    initials: 'BA',
-    quote:
-      'The Smart Calculator quadratic solver shows the discriminant and exact steps cleanly without switching apps.',
-  },
-  {
-    name: 'Sana Fatima',
-    role: 'BBA Student · Multan',
-    initials: 'SF',
-    quote:
-      'AI Tools summarizes dense 10-page reading assignments into crisp bullet points I can revise before class.',
-  },
-  {
-    name: 'Usman Raza',
-    role: 'Assaulter · 56 Esports',
-    initials: 'UR',
-    quote:
-      'Esports Academy sensitivity drills and clean leaderboard tracking make Blitz Community stand out for PUBG Mobile squads.',
-  },
-  {
-    name: 'Danish Ali',
-    role: 'FSc Pre-Eng · Faisalabad',
-    initials: 'DA',
-    quote:
-      'Converting my physics chapters into flashcards and short questions saved hours every night before board mocks.',
-  },
-  {
-    name: 'Hira Noor',
-    role: 'CS Undergrad · Rawalpindi',
-    initials: 'HN',
-    quote:
-      'The Pomodoro timer and daily task list right beside our community announcements keep my semester on track.',
-  },
-];
-
 export const ESPORTS_SUBSECTIONS = [
   { id: 'news', label: 'PUBG Mobile Esports' },
   { id: 'scrims', label: 'Blitz Official Scrims' },
