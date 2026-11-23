@@ -91,7 +91,16 @@ export default async function handler(req, res) {
   }
 
   const apiKey = (process.env.GEMINI_API_KEY || '').trim();
-  const model = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
+  const primaryModel = (process.env.GEMINI_MODEL || 'gemini-flash-lite-latest').trim();
+  const candidateModels = [...new Set([
+    primaryModel,
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-3.6-flash',
+  ].filter(Boolean))];
+  // Include a quick second attempt on primary if the first pass hits a momentary 503 spike
+  const attemptPlan = [...candidateModels, primaryModel];
 
   if (!apiKey) {
     return res.status(503).json({
@@ -122,69 +131,67 @@ export default async function handler(req, res) {
   const boundedText = sourceText.slice(0, 16000);
   const { prompt, expectJson } = buildPrompt(task, boundedText, options);
 
-  try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-    const upstream = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.35,
-          ...(expectJson ? { responseMimeType: 'application/json' } : {}),
+  let lastError = 'Gemini service unavailable.';
+
+  for (let i = 0; i < attemptPlan.length; i += 1) {
+    const model = attemptPlan[i];
+    if (i > 0) await new Promise((r) => setTimeout(r, 400));
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const upstream = await fetch(endpoint, {
+        method: 'POST',
+        signal: AbortSignal.timeout(12000),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
         },
-      }),
-    });
-
-    if (!upstream.ok) {
-      let detail = `Upstream status ${upstream.status}`;
-      try {
-        const errJson = await upstream.json();
-        if (errJson?.error?.message) detail = errJson.error.message;
-      } catch {
-        // keep generic status message
-      }
-      return res.status(502).json({
-        ok: false,
-        error: `Gemini service request failed: ${detail}`,
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.35,
+          },
+        }),
       });
-    }
 
-    const payload = await upstream.json();
-    const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!rawText) {
-      return res.status(502).json({
-        ok: false,
-        error: 'Gemini returned an empty response. Please try again with clearer input.',
-      });
-    }
-
-    if (expectJson) {
-      const cleaned = rawText
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```$/i, '')
-        .trim();
-      const parsed = safeJsonParse(cleaned);
-      if (!parsed) {
-        return res.status(502).json({
-          ok: false,
-          error: 'AI returned malformed structured data. Please retry.',
-        });
+      if (!upstream.ok) {
+        let detail = `Upstream status ${upstream.status}`;
+        try {
+          const errJson = await upstream.json();
+          if (errJson?.error?.message) detail = errJson.error.message;
+        } catch {
+          // keep generic status message
+        }
+        lastError = `Gemini service request failed: ${detail}`;
+        // Retry next fallback model on transient capacity/rate/model availability errors
+        if (upstream.status === 503 || upstream.status === 429 || upstream.status === 404 || upstream.status === 400) {
+          continue;
+        }
+        return res.status(502).json({ ok: false, error: lastError });
       }
-      return res.status(200).json({ ok: true, data: parsed });
-    }
 
-    return res.status(200).json({ ok: true, data: rawText.trim() });
-  } catch (err) {
-    return res.status(502).json({
-      ok: false,
-      error: `Unable to reach Gemini backend service: ${err.message || 'Network error'}`,
-    });
+      const payload = await upstream.json();
+      const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!rawText) {
+        lastError = 'Gemini returned an empty response. Please try again with clearer input.';
+        continue;
+      }
+
+      if (expectJson) {
+        const parsed = extractJsonPayload(rawText);
+        if (!parsed) {
+          lastError = 'AI returned malformed structured data. Please retry.';
+          continue;
+        }
+        return res.status(200).json({ ok: true, modelUsed: model, data: parsed });
+      }
+
+      return res.status(200).json({ ok: true, modelUsed: model, data: rawText.trim() });
+    } catch (err) {
+      lastError = `Unable to reach Gemini backend service: ${err.message || 'Network error'}`;
+    }
   }
+
+  return res.status(502).json({ ok: false, error: lastError });
 }
 
 function safeJsonParse(str) {
@@ -193,4 +200,31 @@ function safeJsonParse(str) {
   } catch {
     return null;
   }
+}
+
+function extractJsonPayload(rawText) {
+  const cleaned = rawText
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  const direct = safeJsonParse(cleaned);
+  if (direct) return direct;
+
+  const arrStart = cleaned.indexOf('[');
+  const arrEnd = cleaned.lastIndexOf(']');
+  if (arrStart !== -1 && arrEnd > arrStart) {
+    const parsedArr = safeJsonParse(cleaned.slice(arrStart, arrEnd + 1));
+    if (parsedArr) return parsedArr;
+  }
+
+  const objStart = cleaned.indexOf('{');
+  const objEnd = cleaned.lastIndexOf('}');
+  if (objStart !== -1 && objEnd > objStart) {
+    const parsedObj = safeJsonParse(cleaned.slice(objStart, objEnd + 1));
+    if (parsedObj) return parsedObj;
+  }
+
+  return null;
 }
