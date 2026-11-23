@@ -1,0 +1,77 @@
+@layer base, tokens, layout, components, utilities;
+
+@layer tokens {
+  :root {
+    color-scheme: light;
+
+    /* Clean full-bleed SaaS palette matching reference website (zero purple, zero neon) */
+    --sheet-bg: #ffffff;
+    --surface-bg: #f7f8fa;
+    --surface-elevated: #ffffff;
+    --surface-muted: #eef1f5;
+
+    /* Text tokens */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --text-on-accent: #ffffff;
+
+    /* Brand & accent tokens */
+    --accent-primary: #1d63ed;
+    --accent-primary-hover: #1551c7;
+    --accent-secondary: #18181b;
+    --accent-secondary-hover: #27272a;
+    --accent-warm: #d97706;
+    --accent-gold: #f5b800;
+    --accent-success: #16a34a;
+    --accent-danger: #dc2626;
+
+    /* Borders & shadows */
+    --border-subtle: #e5e7eb;
+    --border-strong: #d1d5db;
+    --shadow-card: 0 2px 10px rgb(17 24 39 / 0.04);
+    --shadow-card-hover: 0 10px 26px -8px rgb(17 24 39 / 0.12);
+    --shadow-overlay: 0 20px 50px -14px rgb(17 24 39 / 0.24);
+
+    /* Typography & radii */
+    --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    --radius-sm: 0.55rem;
+    --radius-md: 0.9rem;
+    --radius-lg: 1.25rem;
+    --radius-pill: 9999px;
+
+    --container-max: 78rem;
+    --focus-ring: 2px solid #1d63ed;
+  }
+
+  [data-theme='dark'] {
+    color-scheme: dark;
+
+    /* Pure neutral charcoal/slate dark mode — zero purple, zero neon */
+    --sheet-bg: #0f1217;
+    --surface-bg: #161b22;
+    --surface-elevated: #1c222b;
+    --surface-muted: #252d3a;
+
+    --text-primary: #f3f4f6;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-on-accent: #ffffff;
+
+    --accent-primary: #2563eb;
+    --accent-primary-hover: #1d4ed8;
+    --accent-secondary: #f3f4f6;
+    --accent-secondary-hover: #e5e7eb;
+
+    --border-subtle: #28313e;
+    --border-strong: #394455;
+    --shadow-card: 0 2px 12px rgb(0 0 0 / 0.28);
+    --shadow-card-hover: 0 12px 28px -8px rgb(0 0 0 / 0.45);
+    --shadow-overlay: 0 20px 50px -14px rgb(0 0 0 / 0.65);
+
+    --focus-ring: 2px solid #3b82f6;
+  }
+}
