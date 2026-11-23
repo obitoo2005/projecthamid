@@ -103,6 +103,52 @@ export default function App() {
     localStorage.setItem('blitz_tasks', JSON.stringify(tasks));
   }, [tasks]);
 
+  // Fallback scroll progress & reveal animations ONLY when browser lacks native CSS Scroll-Driven Animations
+  useEffect(() => {
+    const prefersMotion = window.matchMedia?.('(prefers-reduced-motion: no-preference)')?.matches;
+    if (!prefersMotion) return undefined;
+
+    const cleanups = [];
+
+    if (!CSS.supports('animation-timeline', 'scroll()')) {
+      const bar = document.getElementById('scroll-progress');
+      if (bar) {
+        const onScroll = () => {
+          const max = document.documentElement.scrollHeight - window.innerHeight;
+          const ratio = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+          bar.style.transform = `scaleX(${ratio})`;
+        };
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        cleanups.push(() => window.removeEventListener('scroll', onScroll));
+      }
+    }
+
+    if (!CSS.supports('(animation-timeline: view()) and (animation-range: entry)')) {
+      const targets = document.querySelectorAll('.reveal-on-scroll');
+      if (targets.length) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('reveal-fallback-visible');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.12 },
+        );
+        targets.forEach((el) => {
+          el.classList.add('reveal-fallback-hidden');
+          io.observe(el);
+        });
+        cleanups.push(() => io.disconnect());
+      }
+    }
+
+    return () => cleanups.forEach((fn) => fn());
+  }, [activeView]);
+
   const navigate = (view) => {
     setActiveView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -123,6 +169,7 @@ export default function App() {
 
   return (
     <div className="app-frame">
+      <div id="scroll-progress" className="scroll-progress-bar" aria-hidden="true" />
       <Navbar
         activeView={activeView}
         onNavigate={navigate}
@@ -137,38 +184,40 @@ export default function App() {
           </div>
         )}
 
-        {activeView === 'dashboard' && <DashboardView onNavigate={navigate} stats={stats} />}
-        {activeView === 'study' && (
-          <StudyAIView
-            aiConfigured={siteConfig.aiConfigured}
-            quizHistory={quizHistory}
-            onRecordQuiz={(entry) => setQuizHistory((prev) => [entry, ...prev])}
-          />
-        )}
-        {activeView === 'calculator' && <CalculatorView />}
-        {activeView === 'tools' && <AIToolsView aiConfigured={siteConfig.aiConfigured} />}
-        {activeView === 'esports' && <EsportsView links={siteConfig.links} />}
-        {activeView === 'community' && (
-          <CommunityView
-            links={siteConfig.links}
-            tasks={tasks}
-            onAddTask={(t) => setTasks((prev) => [t, ...prev])}
-            onToggleTask={(id) =>
-              setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-            }
-            onDeleteTask={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
-          />
-        )}
-        {activeView === 'profile' && (
-          <ProfileView
-            profile={profile}
-            onSaveProfile={setProfile}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-            quizHistory={quizHistory}
-            onClearHistory={() => setQuizHistory([])}
-          />
-        )}
+        <div key={activeView} className="view-enter">
+          {activeView === 'dashboard' && <DashboardView onNavigate={navigate} stats={stats} />}
+          {activeView === 'study' && (
+            <StudyAIView
+              aiConfigured={siteConfig.aiConfigured}
+              quizHistory={quizHistory}
+              onRecordQuiz={(entry) => setQuizHistory((prev) => [entry, ...prev])}
+            />
+          )}
+          {activeView === 'calculator' && <CalculatorView />}
+          {activeView === 'tools' && <AIToolsView aiConfigured={siteConfig.aiConfigured} />}
+          {activeView === 'esports' && <EsportsView links={siteConfig.links} />}
+          {activeView === 'community' && (
+            <CommunityView
+              links={siteConfig.links}
+              tasks={tasks}
+              onAddTask={(t) => setTasks((prev) => [t, ...prev])}
+              onToggleTask={(id) =>
+                setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
+              }
+              onDeleteTask={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
+            />
+          )}
+          {activeView === 'profile' && (
+            <ProfileView
+              profile={profile}
+              onSaveProfile={setProfile}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              quizHistory={quizHistory}
+              onClearHistory={() => setQuizHistory([])}
+            />
+          )}
+        </div>
       </main>
 
       <Footer onNavigate={navigate} links={siteConfig.links} />

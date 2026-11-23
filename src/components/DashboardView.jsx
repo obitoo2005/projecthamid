@@ -194,7 +194,7 @@ export default function DashboardView({ onNavigate, stats }) {
       <section aria-label="Platform highlights">
         <div className="bento-grid">
           {highlights.map(({ label, value, desc, Icon }) => (
-            <article key={label} className="bento-card">
+            <article key={label} className="bento-card reveal-on-scroll">
               <div className="bento-top">
                 <span className="bento-label">{label}</span>
                 <span className="bento-icon-box" aria-hidden="true">
@@ -210,7 +210,7 @@ export default function DashboardView({ onNavigate, stats }) {
 
       {/* What we offer (6 Pillars in horizontal reference cards) */}
       <section aria-labelledby="offers-heading">
-        <div className="section-head">
+        <div className="section-head reveal-on-scroll">
           <h2 id="offers-heading" className="section-title">
             What we offer
           </h2>
@@ -219,7 +219,7 @@ export default function DashboardView({ onNavigate, stats }) {
 
         <div className="offers-stack">
           {CORE_PILLARS.map((item) => (
-            <div key={item.num} className="offer-wrapper">
+            <div key={item.num} className="offer-wrapper reveal-on-scroll">
               <article className="offer-card">
                 <div className="offer-left">
                   <span className="offer-eyebrow">{item.eyebrow}</span>
@@ -244,7 +244,7 @@ export default function DashboardView({ onNavigate, stats }) {
       </section>
 
       {/* Trusted metrics strip */}
-      <section className="trusted-strip" aria-labelledby="trusted-heading">
+      <section className="trusted-strip reveal-on-scroll" aria-labelledby="trusted-heading">
         <h2 id="trusted-heading" className="section-title">
           Trusted by Students &amp; Squads
         </h2>
@@ -265,7 +265,7 @@ export default function DashboardView({ onNavigate, stats }) {
       </section>
 
       {/* Ready to Start Bottom CTA Banner */}
-      <section className="cta-banner" aria-labelledby="cta-heading">
+      <section className="cta-banner reveal-on-scroll" aria-labelledby="cta-heading">
         <div className="stack-md">
           <div className="stack-sm">
             <span className="offer-eyebrow">Ready to Start?</span>

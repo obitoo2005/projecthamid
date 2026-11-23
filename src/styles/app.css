@@ -690,9 +690,11 @@
     gap: 0.55rem;
   }
 
-  /* Spinner animation */
+  /* Spinner animation — opt in to motion cleanly */
   .spin {
-    animation: blitz-spin 0.9s linear infinite;
+    @media (prefers-reduced-motion: no-preference) {
+      animation: blitz-spin 0.9s linear infinite;
+    }
   }
 
   @keyframes blitz-spin {
@@ -701,9 +703,149 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .spin {
-      animation: none;
+  /* Top Scroll Progress Indicator (Compositor-only scaleX) */
+  .scroll-progress-bar {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 3px;
+    z-index: 60;
+    background: var(--accent-primary);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  @keyframes blitz-scroll-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes blitz-scroll-reveal {
+    from {
+      opacity: 0.08;
+      translate: 0 22px;
+      scale: 0.985;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+      scale: 1;
+    }
+  }
+
+  @keyframes blitz-view-enter {
+    from {
+      opacity: 0;
+      translate: 0 10px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Native CSS Scroll Progress Bar */
+    @supports (animation-timeline: scroll()) {
+      .scroll-progress-bar {
+        animation: blitz-scroll-progress auto linear;
+        animation-timeline: scroll(root block);
+      }
+    }
+
+    /* Native CSS Scroll-Driven Reveal Animations */
+    @supports ((animation-timeline: view()) and (animation-range: entry)) {
+      .reveal-on-scroll {
+        animation: blitz-scroll-reveal auto ease-out both;
+        animation-timeline: view(block);
+        animation-range: entry 0% cover 26%;
+      }
+    }
+
+    /* Smooth fallback class used only by JS IntersectionObserver on older browsers */
+    .reveal-fallback-hidden {
+      opacity: 0;
+      translate: 0 20px;
+      transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1), translate 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal-fallback-visible {
+      opacity: 1;
+      translate: 0 0;
+    }
+
+    /* Smooth View Switch & Hero Entrance */
+    .view-enter {
+      min-inline-size: 0;
+      display: contents;
+    }
+
+    .view-enter > * {
+      animation: blitz-view-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .hero-content > * {
+      animation: blitz-view-enter 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .hero-content > :nth-child(2) {
+      animation-delay: 60ms;
+    }
+
+    .hero-content > :nth-child(3) {
+      animation-delay: 120ms;
+    }
+
+    .hero-content > :nth-child(4) {
+      animation-delay: 180ms;
+    }
+
+    /* Discrete entry/exit transitions for native <dialog> & mobile [popover] */
+    dialog.modal-dialog {
+      opacity: 0;
+      translate: 0 8px;
+      transition:
+        opacity 180ms ease-out,
+        translate 180ms ease-out,
+        display 180ms ease-out,
+        overlay 180ms ease-out;
+      transition-behavior: allow-discrete;
+    }
+
+    dialog.modal-dialog[open] {
+      opacity: 1;
+      translate: 0 0;
+
+      @starting-style {
+        opacity: 0;
+        translate: 0 8px;
+      }
+    }
+
+    /* Subtle hover lift on cards (pointer devices only) */
+    @media (hover: hover) {
+      .bento-card,
+      .testimonial-card,
+      .offer-card,
+      .flashcard {
+        transition:
+          translate 180ms cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .bento-card:hover,
+      .testimonial-card:hover,
+      .offer-card:hover,
+      .flashcard:hover {
+        translate: 0 -2px;
+        box-shadow: var(--shadow-card-hover);
+      }
     }
   }
 

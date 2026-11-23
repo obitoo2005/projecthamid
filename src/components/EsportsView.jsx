@@ -163,7 +163,7 @@ export default function EsportsView({ links }) {
       {subTab === 'news' && (
         <div className="grid-3">
           {ESPORTS_NEWS.map((item) => (
-            <article key={item.title} className="panel stack-sm">
+            <article key={item.title} className="panel stack-sm reveal-on-scroll">
               <div className="row-wrap" style={{ justifyContent: 'space-between' }}>
                 <span className="status-chip status-chip-accent">{item.tag}</span>
                 <span className="muted" style={{ fontSize: '0.78rem' }}>

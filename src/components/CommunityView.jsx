@@ -102,7 +102,7 @@ export default function CommunityView({
           {COMMUNITY_ORGS.map((org) => {
             const orgUrl = links?.orgs?.[org.configKey] || '';
             return (
-              <article key={org.name} className="panel stack-sm">
+              <article key={org.name} className="panel stack-sm reveal-on-scroll">
                 <div className="row-wrap" style={{ justifyContent: 'space-between' }}>
                   <span className="status-chip status-chip-accent">{org.badge}</span>
                   <span className="muted" style={{ fontSize: '0.8rem' }}>
